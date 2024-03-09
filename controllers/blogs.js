@@ -39,24 +39,27 @@ blogRouter.put('/:id', async (request, response) => {
     title: body.title,
     author: body.author,
     url: body.url,
-    likes: body.likes || 0,
+    likes: body.likes,
+    user: body.user.id
   }
+  console.log(body)
+  console.log(request.user)
+  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true }).populate('user', { username: 1, name: 1 })
 
-  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
   response.json(updatedBlog)
 })
 
 blogRouter.delete('/:id', async (request, response) => {
   const user = request.user.id.toString()
   const blogCreator = await Blog.findById(request.params.id)
-
-
+  console.log(blogCreator);
+  console.log(user);
   if (blogCreator && user) {
     if (blogCreator.user.toString() === user) {
-      await Blog.findByIdAndDelete(request.params.id)
+      await Blog.findByIdAndRemove(request.params.id)
       response.status(204).json({ message: 'Blog deleted successfully' })
     } else {
-      response.status(401).json({ error: 'user and token´s don´t match' })
+      response.status(401).json({ error: 'user and token dont match' })
     }
   } else {
     response.status(401).json({ error: 'blog does not exist or blog id or token missing' })
