@@ -6,6 +6,15 @@ blogRouter.get('/', async (request, response) => {
   response.json(blogs)
 })
 
+blogRouter.get('/:id', async (request, response) => {
+  const blog = await Blog.findById(request.params.id)
+  if (blog) {
+    response.json(blog)
+  } else {
+    response.status(404).end()
+  }
+})
+
 blogRouter.post('/', async (request, response) => {
 
   const body = request.body
@@ -20,7 +29,7 @@ blogRouter.post('/', async (request, response) => {
     author: body.author,
     url: body.url,
     likes: body.likes || 0,
-    user: user.id
+    user: user
   })
 
   if (blog.title === undefined || blog.url === undefined) {
@@ -52,8 +61,8 @@ blogRouter.put('/:id', async (request, response) => {
 blogRouter.delete('/:id', async (request, response) => {
   const user = request.user.id.toString()
   const blogCreator = await Blog.findById(request.params.id)
-  console.log(blogCreator);
-  console.log(user);
+  console.log(blogCreator)
+  console.log(user)
   if (blogCreator && user) {
     if (blogCreator.user.toString() === user) {
       await Blog.findByIdAndRemove(request.params.id)
